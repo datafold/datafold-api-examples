@@ -1,0 +1,17 @@
+query GetTableByPath($path: String!) {
+  table(path: $path) {
+    uid
+    descriptions {
+      description
+      dataOwnerId
+    }
+    tagIds
+    columns {
+      uid
+      prop {
+        name
+        number
+      }
+    }
+  }
+}
