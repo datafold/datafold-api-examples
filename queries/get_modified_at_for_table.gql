@@ -2,5 +2,9 @@ query GetTableByPath($path: String!) {
   table(path: $path) {
     uid
     lastModifiedAt
+    createdBySql {
+        startedAt
+        completedAt
+    }
   }
 }

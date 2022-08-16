@@ -21,6 +21,9 @@ def print_table_data(data_source_id: int, table_path: Tuple[str, ...]):
         ))
     data = table_data['table']
     print('.'.join(table_path), data['lastModifiedAt'])
+    for created_by in data['createdBySql']:
+        print('   ', created_by['startedAt'])
+    print()
 
 
 def main():
