@@ -1,4 +1,4 @@
-query GetTableByPath($path: String, $statsStart: Date!, $statsEnd: Date!) {
+query GetTableByPath($path: String) {
   table(path: $path) {
     uid
     columns {
@@ -6,8 +6,7 @@ query GetTableByPath($path: String, $statsStart: Date!, $statsEnd: Date!) {
         name
         number
       }
-      usageStats(start: $statsStart, end:$statsEnd) {
-        period
+      usageStats{
         userName
         count
       }

@@ -28,7 +28,9 @@ here: https://app.datafold.com/data_sources and looking up its id in URL.
 ## Usage counters
 Shows how to use column-level access counters. It prints out all columns of a table and number of times they were accessed by different users.
 
-`./usage_counters.py`
+`./usage_counters.py 1234 DATABASE SCHEMA TABLE`
+
+1234 here is the datasource_id, this is found in the URL on the catalog. Ex: /catalog/profile/table/1234/
 
 ## Propogate tag
 Propagates a tag through connected columns. One of the main usecases is to propagate PII tags to all downstream tables.
