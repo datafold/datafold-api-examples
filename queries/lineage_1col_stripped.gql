@@ -1,0 +1,42 @@
+query GetLineageByUID(
+    $primaryUid: ID!
+    $depthDownstream: Int = 2
+    $depthUpstream: Int = 1
+    $biPopularity: [Int!] = [0, 4]
+    $biLastUsedDays: Int = 90
+    $allowedList: [ID!] = []
+  ) {
+    lineage(
+      primaryUid: $primaryUid
+      lineageFilter: {
+        depthDownstream: $depthDownstream
+        depthUpstream: $depthUpstream
+        biLastUsedDays: $biLastUsedDays
+        biPopularity: $biPopularity
+      }
+      allowedList: $allowedList
+    ) {
+
+      # # for debugging
+      # entities {
+      #   ... on Column {
+      #     uid
+      #     tagIds
+      #     prop {
+      #       name
+      #     }
+      #     table {
+      #       prop {
+      #         path
+      #       }
+      #     }
+      #   }
+      # }
+
+      edges {
+        sourceUid
+        destinationUid
+      }
+    }
+  }
+

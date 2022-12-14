@@ -1,0 +1,8 @@
+mutation AttachTags($tagUid: ID!, $objectUids: [ID!]!, $attach: Boolean) {
+  attachTags (connections: [{
+      tagUid: $tagUid,
+      objectUids: $objectUids
+    }],
+    attached: $attach
+  )
+}

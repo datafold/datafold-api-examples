@@ -1,0 +1,16 @@
+query GetTableByPath($path: String, $statsStart: Date!, $statsEnd: Date!) {
+  table(path: $path) {
+    uid
+    columns {
+      prop {
+        name
+        number
+      }
+      usageStats(start: $statsStart, end:$statsEnd) {
+        period
+        userName
+        count
+      }
+    }
+  }
+}

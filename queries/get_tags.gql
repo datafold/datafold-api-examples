@@ -1,0 +1,16 @@
+query getTags {
+  tags(
+    first: 100
+    activeOnly: false
+       
+  ) {
+    page {
+      cursor
+    }
+    items {
+      uid
+      name
+    }
+  }
+}
+
