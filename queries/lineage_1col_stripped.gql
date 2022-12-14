@@ -12,7 +12,7 @@ query GetLineageByUID(
         depthDownstream: $depthDownstream
         depthUpstream: $depthUpstream
         biLastUsedDays: $biLastUsedDays
-        biPopularity: $biPopularity
+        popularity: $biPopularity
       }
       allowedList: $allowedList
     ) {

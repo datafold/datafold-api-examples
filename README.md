@@ -35,4 +35,8 @@ Shows how to use column-level access counters. It prints out all columns of a ta
 ## Propogate tag
 Propagates a tag through connected columns. One of the main usecases is to propagate PII tags to all downstream tables.
 
-`./propagate_tag.py`
+To add tags:
+`./propagate_tag.py` 1234 DATABASE SCHEMA TABLE tagName --set-tag
+
+To remove tags:
+`./propagate_tag.py` 1234 DATABASE SCHEMA TABLE tagName --no-set-tag
