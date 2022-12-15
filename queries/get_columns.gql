@@ -1,0 +1,9 @@
+query getColumns ($uids: [ID!]!) {
+  columns(uids: $uids) {
+    items {
+      uid
+      tagIds
+    }
+  }
+}
+

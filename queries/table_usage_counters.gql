@@ -1,0 +1,15 @@
+query GetTableByPath($path: String) {
+  table(path: $path) {
+    uid
+    columns {
+      prop {
+        name
+        number
+      }
+      usageStats{
+        userName
+        count
+      }
+    }
+  }
+}

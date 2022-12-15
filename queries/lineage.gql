@@ -1,0 +1,108 @@
+query GetLineageByUID(
+    $primaryUid: ID!
+    $depthDownstream: Int = 2
+    $depthUpstream: Int = 1
+    $biPopularity: [Int!] = [0, 4]
+    $biLastUsedDays: Int = 90
+    $allowedList: [ID!] = []
+  ) {
+    org {
+      dataSources {
+        uid
+        type
+        name
+      }
+    }
+    lineage(
+      primaryUid: $primaryUid
+      lineageFilter: {
+        depthDownstream: $depthDownstream
+        depthUpstream: $depthUpstream
+        biLastUsedDays: $biLastUsedDays
+        biPopularity: $biPopularity
+      }
+      allowedList: $allowedList
+    ) {
+      primary {
+        ... on Table {
+          uid
+          columnIds
+          lastModifiedAt
+        }
+        ... on BiDashboard {
+          uid
+          name
+          parentDatasource {
+            name
+            type
+            uid
+          }
+          parentSpace {
+            name
+            uid
+          }
+          parentWorkspace {
+            name
+            uid
+          }
+          popularity
+          stats {
+            ... on BiModeReportStat {
+              lastRunAt
+            }
+          }
+        }
+      }
+      entities {
+        ... on Table {
+          lastModifiedAt
+          uid
+          prop {
+            path
+            dataSourceId
+          }
+        }
+        ... on Column {
+          __typename
+          uid
+          prop {
+            name
+            type
+            dbType
+          }
+          tableId
+          table {
+            prop {
+              path
+            }
+            uid
+          }
+        }
+        ... on BiDashboard {
+          popularity
+          name
+          uid
+          parentDatasource {
+            uid
+            name
+            type
+          }
+          parentSpace {
+            name
+            uid
+          }
+          parentWorkspace {
+            uid
+            name
+          }
+        }
+      }
+      edges {
+        direction
+        sourceUid
+        destinationUid
+        type
+      }
+    }
+  }
+
