@@ -44,3 +44,9 @@ To add tags:
 
 To remove tags:
 `./propagate_tag.py 1234 DATABASE SCHEMA TABLE tagName --no-set-tag`
+
+## Get lineage
+Gets and prints lineage for a table. Default depth is 1 upstream, 1 downstream and can be changed
+with `-u` and `-d` optional arguments.
+
+`./get_lineage.py 1234 DATABASE.SCHEMA.TABLENAME`
