@@ -44,7 +44,7 @@ def get_linked_columns(
         'primaryUid': table_uid,
         'depthDownstream': 1000,
         'depthUpstream': 0,
-        'biPopularity': [0, 4],
+        'popularity': [0, 4],
         'biLastUsedDays': 90,
         'allowedList': column_uids,
     })

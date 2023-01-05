@@ -2,7 +2,7 @@ query GetLineageByUID(
     $primaryUid: ID!
     $depthDownstream: Int = 2
     $depthUpstream: Int = 1
-    $biPopularity: [Int!] = [0, 4]
+    $popularity: [Int!] = [0, 4]
     $biLastUsedDays: Int = 90
     $allowedList: [ID!] = []
   ) {
@@ -12,7 +12,7 @@ query GetLineageByUID(
         depthDownstream: $depthDownstream
         depthUpstream: $depthUpstream
         biLastUsedDays: $biLastUsedDays
-        biPopularity: $biPopularity
+        popularity: $popularity
       }
       allowedList: $allowedList
     ) {
