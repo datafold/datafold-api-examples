@@ -1,0 +1,34 @@
+query GetLineageByUID(
+    $primaryUid: ID!
+    $depthDownstream: Int = 2
+    $depthUpstream: Int = 1
+  ) {
+    lineage(
+      primaryUid: $primaryUid
+      lineageFilter: {
+        depthDownstream: $depthDownstream
+        depthUpstream: $depthUpstream
+      }
+    ) {
+
+      entities {
+        ... on Column {
+          uid
+          prop {
+            name
+          }
+          table {
+            prop {
+              path
+            }
+          }
+        }
+      }
+
+      edges {
+        sourceUid
+        destinationUid
+      }
+    }
+  }
+
