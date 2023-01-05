@@ -10,9 +10,13 @@ Preparation steps
     # Install dependencies
     pip install -r requirements.txt
 
+    # If you are using a single-tenant install, set its base URL
+    export DATAFOLD_HOST=https://app.datafold.com
+
     # Set env variable with Datafold key
     # You can get it here: https://app.datafold.com/users/me
     export DATAFOLD_API_KEY=<token-that-you-can-get-in-datafold-ui>
+
 
 
 ## Impact analysis

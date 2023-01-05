@@ -10,8 +10,10 @@ if token is None:
     print('Please set DATAFOLD_API_KEY environment variable')
     sys.exit(-1)
 
+host = os.environ.get('DATAFOLD_HOST', 'https://app.datafold.com')
+
 transport = AIOHTTPTransport(
-    url='https://app.datafold.com/api/graphql',
+    url=host + '/api/graphql',
     headers={'Authorization': 'Key ' + token},
     # headers={'Authorization': 'Key gVozB2TueGb8V20ckaj9jr8PRdNgIozHjaEsYnjD'}
 )
