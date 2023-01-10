@@ -12,7 +12,16 @@ query GetLineageByUID(
     ) {
 
       entities {
+        ... on Table {
+          __typename
+          uid
+          prop {
+            path
+            dataSourceId
+          }
+        }
         ... on Column {
+          __typename
           uid
           prop {
             name

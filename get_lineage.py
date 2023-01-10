@@ -45,18 +45,24 @@ def get_links(
         edge_uid_pairs.append((edge['sourceUid'], edge['destinationUid']))
 
 
-    uid_to_column_path = {}
-    for col in lineage_data['lineage']['entities']:
-        uid = col.get('uid')
-        if uid is None:
-            continue  # that's not a column
+    uid_to_path = {}
+    for obj in lineage_data['lineage']['entities']:
+        if obj['__typename'] == 'Table':
+            uid = obj.get('uid')
+            table_path = obj['prop']['path']
+            uid_to_path[uid] = (table_path, None)
 
-        column_name = col['prop']['name']
-        table_path = col['table']['prop']['path']
-        uid_to_column_path[uid] = (table_path, column_name)
+        elif obj['__typename'] == 'Column':
+            uid = obj.get('uid')
+            if uid is None:
+                continue  # that's not a column
+
+            column_name = obj['prop']['name']
+            table_path = obj['table']['prop']['path']
+            uid_to_path[uid] = (table_path, column_name)
 
     return [
-        (uid_to_column_path[src], uid_to_column_path[dst])
+        (uid_to_path[src], uid_to_path[dst])
         for src, dst in edge_uid_pairs
     ]
 
@@ -86,13 +92,20 @@ def main():
         print('Names are case sensitive')
         sys.exit(-1)
 
-    for (src_table, src_column), (dst_table, dst_column) in links:
-        # Quick and dirty way to strip double quotes that you probably don't
+    def format_path(path):
+        table, column = path
+
+        # A quick and dirty way to strip double quotes that you probably don't
         # want to see. If you tables somehow contain " in their names, you'd
         # need more advanced dequoting.
-        src_table = src_table.replace('"', '')
-        dst_table = dst_table.replace('"', '')
-        print(src_table, src_column, '->', dst_table, dst_column)
+        formatted_table = table.replace('"', '')
+        if column is None:
+            return formatted_table
+        else:
+            return formatted_table + ' ' + column
+
+    for src_path, dst_path in links:
+        print(format_path(src_path), '->', format_path(dst_path))
 
 if __name__ == '__main__':
     main()
