@@ -10,10 +10,10 @@ from common import client, load_query, sql_quote_path, NotFoundError
 
 
 def get_linked_columns(
-        data_source_id: int,
-        table_path: Tuple[str, ...],
-        columns: List[str]):
-
+    data_source_id: int,
+    table_path: Tuple[str, ...],
+    columns: List[str],
+):
     # First we need to get uids of the table and its columns
     table_data = client.execute(
         load_query('queries/table_by_path.gql'),
@@ -49,26 +49,35 @@ def get_linked_columns(
         'allowedList': column_uids,
     })
 
-    columns_to_ignore = set(column_name_to_uid.values()) - set(column_uids)
     connected_columns = set()
     for edge in lineage_data['lineage']['edges']:
         if edge['sourceUid'] is None or edge['destinationUid'] is None:
-            continue # this is an "off-chart" edge
+            continue   # this is an "off-chart" edge
 
         connected_columns.add(edge['sourceUid'])
         connected_columns.add(edge['destinationUid'])
 
     columns_per_table = defaultdict(set)
-    for col in lineage_data['lineage']['entities']:
-        uid = col.get('uid')
-        if uid is None:
-            continue  # that's not a column
+    for tabular_entity in lineage_data['lineage']['entities']:
+        print(
+            tabular_entity['__typename'],
+            tabular_entity.get(
+                'prop', {},
+            ).get('path') or tabular_entity.get('name')
+        )
 
-        if uid not in connected_columns:
-            continue
+        for col in tabular_entity.get('columns', []):
+            uid = col.get('uid')
+            if uid is None:
+                continue  # that's not a column
 
-        table = col['table']['prop']['path']
-        columns_per_table[table].add(col['prop']['name'])
+            if uid not in connected_columns:
+                continue
+
+            column_name = col.get('prop', {}).get('name') or col.get('name') or uid
+            print(f'  - {column_name}')
+            if tags := col.get('tags', []):
+                print('    Tags:', ', '.join([tag['name'] for tag in tags]))
 
     return columns_per_table
 
@@ -87,7 +96,7 @@ def main():
     table_path = tuple(args.full_table_name.split('.'))
 
     try:
-        columns_per_table = get_linked_columns(
+        get_linked_columns(
             args.data_source_id,
             table_path,
             args.columns,
@@ -96,12 +105,6 @@ def main():
         print('ERROR:', e)
         print('Names are case sensitive')
         sys.exit(-1)
-
-    for table, column_set in sorted(columns_per_table.items()):
-        for column in sorted(column_set):
-            # that's a hacky and incorrect way to unquote
-            unquoted_table = table.replace('"', '')
-            print(unquoted_table, column)
 
 if __name__ == '__main__':
     main()

@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Iterable
 import os
 import sys
@@ -5,9 +6,20 @@ import sys
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 
+env_file = Path(__file__).parent / '.env'
+if env_file.is_file():
+    lines = env_file.read_text().splitlines()
+    for line in lines:
+        name, value = line.split('=')
+        os.environ[name] = value
+
 token = os.environ.get('DATAFOLD_API_KEY')
 if token is None:
-    print('Please set DATAFOLD_API_KEY environment variable')
+    print('Please set DATAFOLD_API_KEY environment variable.\n')
+    print(
+        'You can do that by writing it into `.env` file '
+        'in the root directory of this project. It will be .gitignore-d.'
+    )
     sys.exit(-1)
 
 host = os.environ.get('DATAFOLD_HOST', 'https://app.datafold.com')
