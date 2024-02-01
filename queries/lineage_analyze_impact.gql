@@ -35,6 +35,7 @@ query GetLineageByUID(
             uid
             tags {
               name
+              color
             }
           }
         }
@@ -84,9 +85,16 @@ query GetLineageByUID(
             }
           }
         }
+
+        ...on BiDashboard {
+          uid
+          name
+        }
       }
 
       edges {
+        direction
+        type
         sourceUid
         destinationUid
       }
