@@ -1,2 +1,4 @@
 aiohttp
 gql
+jeeves-shell[all]
+networkx
