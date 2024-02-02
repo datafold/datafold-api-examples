@@ -22,11 +22,12 @@ def get_linked_columns(
     data_source_id: int,
     table_path: Tuple[str, ...],
     columns: List[str],
+    columns_by_tag: str,
 ):
     # First we need to get uids of the table and its columns
-    table_data = client.execute(
-        load_query('queries/table_by_path.gql'),
-        {'path': sql_quote_path((str(data_source_id),) + table_path)}
+    table_data = execute_stored_query(
+        QUERIES / 'table_by_path.gql',
+        path=sql_quote_path((str(data_source_id),) + table_path),
     )
     if table_data['table'] is None:
         raise NotFoundError('Table "%s" not found in data source #%d' % (
@@ -44,6 +45,19 @@ def get_linked_columns(
         if uid is None:
             raise NotFoundError('Column %s is not found' % c)
         column_uids.append(uid)
+
+    if columns_by_tag:
+        column_uids = [
+            column['uid']
+            for column in table_data['table']['columns']
+            if columns_by_tag in {
+                tag['name'] for tag in column['tags']
+            }
+        ]
+        if not column_uids:
+            raise ValueError(
+                f'No columns found for tag `{columns_by_tag}`.',
+            )
 
     # Now let's get all downstreams
     lineage_data = execute_stored_query(
@@ -124,6 +138,10 @@ def analyze_impact(
         'Print downstreams only for these columns of the table in question. '
         'Format: `ID,COL1,ANOTHER_COL`. Case sensitive.'
     ))] = '',
+    columns_by_tag: Annotated[str, Option(help=(
+        'Print downstreams only for the columns of the primary table which are '
+        'tagged with the specified tag.'
+    ))] = '',
 ):
     """
     Print downstream dependencies of a given table.
@@ -136,12 +154,18 @@ def analyze_impact(
 
     * Find your Data Source; the leftmost column in the Data Sources list is ID.
     """
+    if columns_by_tag and columns:
+        raise ValueError(
+            'Please specify only one of `--columns-by-tag` & `--columns`.',
+        )
+
 
     try:
         get_linked_columns(
             data_source_id=data_source_id,
             table_path=tuple(table_path.split('.')),
             columns=[column.strip() for column in columns.split(',') if column],
+            columns_by_tag=columns_by_tag,
         )
     except NotFoundError as e:
         print('ERROR:', e)

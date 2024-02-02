@@ -12,6 +12,9 @@ query GetTableByPath($path: String!) {
         name
         number
       }
+      tags {
+        name
+      }
     }
   }
 }
