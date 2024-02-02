@@ -18,20 +18,83 @@ query GetLineageByUID(
     ) {
 
       entities {
-        ... on Column {
+        __typename
+
+        ...on Table {
           uid
           prop {
-            name
+            path
           }
-          table {
+          columns {
             prop {
-              path
+              dbType
+              name
+              type
+              __typename
+            }
+            uid
+            tags {
+              name
+              color
             }
           }
+        }
+
+        ...on DataAppCommon {
+          name
+        }
+
+        ...on DataAppLookerView {
+          name
+          columns {
+            ...on LookerViewDimension {
+              uid
+              name
+            }
+            ...on LookerViewMeasure {
+              uid
+              name
+            }
+          }
+        }
+
+        ...on DataAppLookerExplore {
+          name
+          columns {
+            ...on LookerViewDimension {
+              uid
+              name
+            }
+            ...on LookerViewMeasure {
+              uid
+              name
+            }
+          }
+        }
+
+        ...on DataAppLookerLook {
+          name
+          columns {
+            ...on LookerViewDimension {
+              uid
+              name
+            }
+            ...on LookerViewMeasure {
+              uid
+              name
+            }
+          }
+        }
+
+        ...on BiDashboard {
+          uid
+          name
         }
       }
 
       edges {
+        direction
+        type
         sourceUid
         destinationUid
       }

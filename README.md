@@ -17,19 +17,22 @@ Preparation steps
     # You can get it here: https://app.datafold.com/users/me
     export DATAFOLD_API_KEY=<token-that-you-can-get-in-datafold-ui>
 
+## Try this out
 
+Issue the following command to print available commands:
 
-## Impact analysis
+```shell
+j
+```
 
-The script shows all downstream columns for a given table. You can also
-trace a subset of columns of the table.
+…and follow the white rabbit.
 
-First argument is data source id. You can look it up by clicking on data source
-here: https://app.datafold.com/data_sources and looking up its id in URL.
+> For instance, `j analyze-impact` will help you analyze downstream impact of a table or its columns.
 
-`./analyze_impact.py 4233 DB.SCHEMA.TABLE_NAME COLUMN_NAME COLUMN_NAME2`
+# Commands not wrapped under `j`
 
 ## Usage counters
+
 Shows how to use column-level access counters. It prints out all columns of a table and number of times they were accessed by different users.
 
 `./usage_counters.py 1234 DATABASE SCHEMA TABLE`

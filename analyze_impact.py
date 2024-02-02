@@ -2,18 +2,27 @@
 import argparse
 from collections import defaultdict
 import datetime
+from rich.console import Console
 import sys
-from typing import Tuple, List
+from typing import Tuple, List, Annotated
 
-from common import client, load_query, sql_quote_path, NotFoundError
+import networkx
+import rich
+from typer import Argument, Option
 
+from common import (
+    client, load_query, sql_quote_path, NotFoundError,
+    execute_stored_query, QUERIES,
+)
+
+console = Console()
 
 
 def get_linked_columns(
-        data_source_id: int,
-        table_path: Tuple[str, ...],
-        columns: List[str]):
-
+    data_source_id: int,
+    table_path: Tuple[str, ...],
+    columns: List[str],
+):
     # First we need to get uids of the table and its columns
     table_data = client.execute(
         load_query('queries/table_by_path.gql'),
@@ -36,72 +45,105 @@ def get_linked_columns(
             raise NotFoundError('Column %s is not found' % c)
         column_uids.append(uid)
 
-    # print('table uid:', table_uid)
-    # print('column uid:', column_uids)
-
     # Now let's get all downstreams
-    lineage_data = client.execute(load_query('queries/lineage_analyze_impact.gql'), {
-        'primaryUid': table_uid,
-        'depthDownstream': 1000,
-        'depthUpstream': 0,
-        'popularity': [0, 4],
-        'biLastUsedDays': 90,
-        'allowedList': column_uids,
-    })
+    lineage_data = execute_stored_query(
+        QUERIES / 'lineage_analyze_impact.gql',
+        primaryUid=table_uid,
+        depthDownstream=1000,
+        depthUpstream=0,
+        popularity=[0, 4],
+        biLastUsedDays=90,
+        allowedList=column_uids,
+    )
 
-    columns_to_ignore = set(column_name_to_uid.values()) - set(column_uids)
     connected_columns = set()
-    for edge in lineage_data['lineage']['edges']:
-        if edge['sourceUid'] is None or edge['destinationUid'] is None:
-            continue # this is an "off-chart" edge
 
-        connected_columns.add(edge['sourceUid'])
-        connected_columns.add(edge['destinationUid'])
+    edges = [
+        (source, destination)
+        for edge in lineage_data['lineage']['edges']
+        if (
+            # Filter out "off-chart" edges
+            (source := edge['sourceUid'])
+            and (destination := edge['destinationUid'])
+        )
+    ]
 
-    columns_per_table = defaultdict(set)
-    for col in lineage_data['lineage']['entities']:
-        uid = col.get('uid')
-        if uid is None:
-            continue  # that's not a column
+    if column_uids:
+        graph = networkx.Graph()
+        graph.add_edges_from(edges)
 
-        if uid not in connected_columns:
-            continue
+        connected_columns = {
+            connected_uid
+            for allowed_column in column_uids
+            for edge in networkx.dfs_edges(graph, source=allowed_column)
+            for connected_uid in edge
+        }
 
-        table = col['table']['prop']['path']
-        columns_per_table[table].add(col['prop']['name'])
+    else:
+        connected_columns = {
+            connected_uid
+            for edge in edges
+            for connected_uid in edge
+        }
 
-    return columns_per_table
+    for tabular_entity in lineage_data['lineage']['entities']:
+        name = tabular_entity.get(
+            'prop', {},
+        ).get('path') or tabular_entity.get('name') or '???'
+        entity_type = tabular_entity['__typename']
+
+        rich.print(f'[purple]{entity_type}[/purple] [green]{name}[/green]')
+
+        for col in tabular_entity.get('columns', []):
+            uid = col.get('uid')
+            if uid is None:
+                continue  # that's not a column
+
+            if uid not in connected_columns:
+                continue
+
+            column_name = col.get('prop', {}).get('name') or col.get('name') or uid
+            rich.print(f'  - {column_name}')
+            if tags := col.get('tags', []):
+                console.print(f'    [i]Tags:[/i] ', end='')
+                for tag in tags:
+                    color = tag['color'].strip('#')
+                    console.print(
+                        tag['name'],
+                        style=f'#{color}', end='',
+                    )
+                    console.print()
 
 
-def main():
-    parser = argparse.ArgumentParser(description='Analyze downstream dependencies')
-    parser.add_argument('data_source_id', type=int)
-    parser.add_argument('full_table_name', type=str,
-                        help='db.schema.name format, case-sensitive')
-    parser.add_argument('columns', metavar='column', type=str, nargs='*',
-                        help='column name to trace; ommit to trace all columns')
+def analyze_impact(
+    data_source_id: Annotated[int, Argument(help='Data source ID.')],
+    table_path: Annotated[str, Argument(
+        help='Full table path, case sensitive. Format: DB.SCHEMA.TABLE',
+    )],
+    columns: Annotated[str, Option(help=(
+        'Print downstreams only for these columns of the table in question. '
+        'Format: `ID,COL1,ANOTHER_COL`. Case sensitive.'
+    ))] = '',
+):
+    """
+    Print downstream dependencies of a given table.
 
-    args = parser.parse_args()
+    How to obtain Data Source ID:
 
-    # fast and dirty, doesn't handle quotes
-    table_path = tuple(args.full_table_name.split('.'))
+    * Open https://app.datafold.com,
+
+    * Go to **Settings** → Data Sources,
+
+    * Find your Data Source; the leftmost column in the Data Sources list is ID.
+    """
 
     try:
-        columns_per_table = get_linked_columns(
-            args.data_source_id,
-            table_path,
-            args.columns,
+        get_linked_columns(
+            data_source_id=data_source_id,
+            table_path=tuple(table_path.split('.')),
+            columns=[column.strip() for column in columns.split(',') if column],
         )
     except NotFoundError as e:
         print('ERROR:', e)
         print('Names are case sensitive')
         sys.exit(-1)
-
-    for table, column_set in sorted(columns_per_table.items()):
-        for column in sorted(column_set):
-            # that's a hacky and incorrect way to unquote
-            unquoted_table = table.replace('"', '')
-            print(unquoted_table, column)
-
-if __name__ == '__main__':
-    main()
