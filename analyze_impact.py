@@ -81,7 +81,7 @@ def get_linked_columns(
     ]
 
     if column_uids:
-        graph = networkx.Graph()
+        graph = networkx.DiGraph()
         graph.add_edges_from(edges)
 
         connected_columns = {
