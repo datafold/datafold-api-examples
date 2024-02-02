@@ -70,8 +70,6 @@ def get_linked_columns(
         allowedList=column_uids,
     )
 
-    connected_columns = set()
-
     edges = [
         (source, destination)
         for edge in lineage_data['lineage']['edges']
