@@ -103,14 +103,14 @@ def get_linked_columns(
                 continue
 
             column_name = col.get('prop', {}).get('name') or col.get('name') or uid
-            rich.print(f'  - {column_name}')
+            rich.print(f'  • {column_name}')
             if tags := col.get('tags', []):
-                console.print(f'    [i]Tags:[/i] ', end='')
+                console.print(f'    └ [i]🏷️  Tags:[/i] ', end='')
                 for tag in tags:
-                    color = tag['color'].strip('#')
+                    color = tag['color']
                     console.print(
                         tag['name'],
-                        style=f'#{color}', end='',
+                        style=color, end='',
                     )
                     console.print()
 

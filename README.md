@@ -31,6 +31,8 @@ j
 
 # Commands not wrapped under `j`
 
+Might be slightly out of date.
+
 ## Usage counters
 
 Shows how to use column-level access counters. It prints out all columns of a table and number of times they were accessed by different users.
