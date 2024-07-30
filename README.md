@@ -1,7 +1,9 @@
 Useful examples for Datafold GraphQL API
 ----------------------------------------
 
-Preparation steps
+## Preparation steps
+
+Make sure you have Python ⩾ 3.10 installed.
 
     # Create and activate python virtual environment
     virtualenv .venv
