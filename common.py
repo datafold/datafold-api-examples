@@ -32,12 +32,11 @@ host = os.environ.get('DATAFOLD_HOST', 'https://app.datafold.com')
 transport = AIOHTTPTransport(
     url=host + '/api/graphql',
     headers={'Authorization': 'Key ' + token},
-    # headers={'Authorization': 'Key gVozB2TueGb8V20ckaj9jr8PRdNgIozHjaEsYnjD'}
 )
 
 client = Client(
     transport=transport,
-    fetch_schema_from_transport=True,
+    fetch_schema_from_transport=False,
     execute_timeout=20 * 60,
 )
 
