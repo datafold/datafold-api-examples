@@ -104,6 +104,9 @@ def get_linked_columns(
         ).get('path') or tabular_entity.get('name') or '???'
         entity_type = tabular_entity['__typename']
 
+        if tableau_project_name := tabular_entity.get('projectName'):
+            name = f'[i]{tableau_project_name}[/i]/{name}'
+
         rich.print(f'[purple]{entity_type}[/purple] [green]{name}[/green]')
 
         for col in tabular_entity.get('columns', []):
