@@ -86,6 +86,10 @@ query GetLineageByUID(
           }
         }
 
+        ...on DataAppTableauWorkbook {
+          projectName
+        }
+
         ...on BiDashboard {
           uid
           name
